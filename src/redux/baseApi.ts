@@ -1,6 +1,6 @@
 // Need to use the React-specific entry point to import createApi
 import { createApi } from '@reduxjs/toolkit/query/react'
-import axiosBaseQuery from './features/auth/axiosBaseQuery'
+import axiosBaseQuery from './features/axiosBaseQuery'
 
 
 

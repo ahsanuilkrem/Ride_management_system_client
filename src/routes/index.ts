@@ -19,6 +19,9 @@ import type { TRole } from "@/types";
 import RideRequestForm from "@/pages/RideRequestForm";
 import UpdateUser from "@/pages/UpdateUser";
 import Homepage from "@/pages/Homepage";
+import Features from "@/pages/Features";
+import Contact from "@/pages/Contact";
+import FAQ from "@/pages/FAQ";
 
 
 const Analytics = lazy(() => import("@/pages/admin/AllUser"));
@@ -36,6 +39,17 @@ export const router = createBrowserRouter([
             {
                 Component: About,
                 path: "about",
+            },
+            {
+                Component: Features,
+                path: "features",
+            },
+            {
+                Component: Contact,
+                path: "contact",
+            },{
+                Component: FAQ,
+                path: "faq",
             },
             {
                 Component: RideRequestForm,

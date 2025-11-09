@@ -1,5 +1,6 @@
+import AllDriver from "@/pages/admin/AllDriver";
 import AllRide from "@/pages/admin/AllRide";
-import UpdateUser from "@/pages/UpdateUser";
+import Analytics from "@/pages/admin/Analytics";
 import type { ISidebarItem } from "@/types";
 import { lazy } from "react";
 
@@ -11,29 +12,34 @@ export const adminSidebarItems: ISidebarItem[] = [
     title: "Dashboard",
     items: [
       {
-        title: "AllUser",
+        title: "Analytics",
+        url: "/admin/analytics",
+        component: Analytics
+      },
+      {
+        title: "All User",
         url: "/admin/allUser",
         component: AllUser
       },
       {
-        title: "UpdateProfile",
-        url: "/admin/UserUpdate",
-        component: UpdateUser
-      },
-
-
-    ],
-  },
-  {
-    title: "RiderDashboard",
-    items: [
-      {
-        title: "AllRide",
+        title: "All Ride",
         url: "/admin/allride",
         component: AllRide
       },
+       {
+        title: "All Driver",
+        url: "/admin/allDriver",
+        component: AllDriver
+      },
+      // {
+      //   title: "UpdateProfile",
+      //   url: "/admin/UserUpdate",
+      //   component: UpdateUser
+      // },
+      
 
     ],
   },
+ 
 
 ]
