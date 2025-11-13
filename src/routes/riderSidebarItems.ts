@@ -1,7 +1,7 @@
 
-import RiderDetails from "@/pages/rider/RiderDetails";
+import ActiveRider from "@/pages/rider/ActiveRider";
+import RequestRide from "@/pages/rider/RequestRide";
 import RiderHistory from "@/pages/rider/RiderHistory";
-import UpdateUser from "@/pages/UpdateUser";
 import type { ISidebarItem } from "@/types";
 
 
@@ -9,6 +9,11 @@ export const riderSidebarItems: ISidebarItem[] = [
     {
         title: "RederDashboard",
         items: [
+             {
+                title: "Book Ride",
+                url: "/rederDashboard/requestRide",
+                component: RequestRide
+            },
             {
                 title: "RiderHistory",
                 url: "/rederDashboard/riderHistory",
@@ -16,15 +21,11 @@ export const riderSidebarItems: ISidebarItem[] = [
 
             },
             {
-                title: "UpdateProfile",
-                url: "/rederDashboard/UserUpdate",
-                component: UpdateUser
-            },
-             {
-                title: "RiderDetails",
-                url: "/rederDashboard/rideDetails",
-                component: RiderDetails
-            },
+                title: "ActiveRider",
+                url: "/rederDashboard/activeRider",
+                component: ActiveRider
+            }
+            
         ],
     },
 

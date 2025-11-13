@@ -304,34 +304,34 @@ const formSchema = z.object({
   destinationLocation: locationSchema,
   destinationAddress: z.string({message:"address must be required"}),
   date: z.date({ message: "Date is required" }),
-  time: z.string({ message: "Time is required" }),
+  vehicleType: z.enum(["CAR", "BIKE"]),
   driver: z.string(),
-  paymentMethod: z.enum(["cash", "card", "wallet"]),
+  paymentMethod: z.enum(["cash", "card"]),
 });
 
-function formatTo12Hour(time: string): string {
-  const [hourStr, minute] = time.split(":");
-  let hour = parseInt(hourStr);
-  const ampm = hour >= 12 ? "PM" : "AM";
-  hour = hour % 12 || 12;
-  return `${hour.toString().padStart(2, "0")}:${minute} ${ampm}`;
-}
+// function formatTo12Hour(time: string): string {
+//   const [hourStr, minute] = time.split(":");
+//   let hour = parseInt(hourStr);
+//   const ampm = hour >= 12 ? "PM" : "AM";
+//   hour = hour % 12 || 12;
+//   return `${hour.toString().padStart(2, "0")}:${minute} ${ampm}`;
+// }
 
 
-const generateTimeSlots = (): string[] => {
-  const slots: string[] = [];
-  for (let h = 6; h <= 23; h++) {
-    for (let m = 0; m < 60; m += 30) {
-      const hour = h.toString().padStart(2, "0");
-      const minute = m.toString().padStart(2, "0");
-      const time24 = `${hour}:${minute}`;
-      slots.push(formatTo12Hour(time24));
-    }
-  }
-  return slots;
-};
+// const generateTimeSlots = (): string[] => {
+//   const slots: string[] = [];
+//   for (let h = 6; h <= 23; h++) {
+//     for (let m = 0; m < 60; m += 30) {
+//       const hour = h.toString().padStart(2, "0");
+//       const minute = m.toString().padStart(2, "0");
+//       const time24 = `${hour}:${minute}`;
+//       slots.push(formatTo12Hour(time24));
+//     }
+//   }
+//   return slots;
+// };
 
-const timeSlots = generateTimeSlots();
+// const timeSlots = generateTimeSlots();
 
 const RideRequestForm = () => {
   const {data: driverData, isLoading: driverLoading } = useGetDriverQuery(undefined);
@@ -345,6 +345,7 @@ const RideRequestForm = () => {
   }))
 
   const form = useForm<z.infer<typeof formSchema>>({
+    
     resolver: zodResolver(formSchema),
     defaultValues: {
       pickupLocation:{ lat: 0, lng: 0, },
@@ -352,26 +353,27 @@ const RideRequestForm = () => {
       destinationLocation: { lat: 0, lng: 0,},
       destinationAddress: "",
       date: new Date(),
-      time: "",
+      vehicleType: "CAR",
       driver: "",
       paymentMethod: "cash",
     },
   });
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
-  console.log(data)
+  // console.log("data",data)
     const payload = {
       ...data,
       date: formatISO(data.date),
+      
     };
-  
+  // console.log("payload",payload)
     try {
       const result = await requestRider(payload).unwrap();
       if (result.success) {
         toast.success("Ride requested successfully!");
         form.reset();
       }
-      console.log(result)
+      // console.log("result",result)
     } catch (err: any) {
       if (err.data?.message === "no token recievd") {
         navigate("/login");
@@ -525,10 +527,35 @@ const RideRequestForm = () => {
             )}
           />         
 
+           <FormField
+                  control={form.control}
+                  name="vehicleType"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel>Vehicle type</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl className="w-full">
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select vehicle" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="CAR">Car</SelectItem>
+                          <SelectItem value="BIKE">Bike</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
 
 
           {/* Time Dropdown */}
-          <FormField
+          {/* <FormField
             control={form.control}
             name="time"
             render={({ field }) => (
@@ -549,7 +576,8 @@ const RideRequestForm = () => {
                 <FormMessage />
               </FormItem>
             )}
-          />
+          /> */}
+
           </div>
 
           {/* Driver data */}

@@ -28,7 +28,7 @@ const LoginForm = ({
     } catch (err) {
       console.error(err);
 
-      if(err.data.message === "password does not match"){
+      if(err.data.message  === "password does not match"){
         toast.error("Invalid credentials")
       }
 

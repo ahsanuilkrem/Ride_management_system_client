@@ -11,6 +11,20 @@ export interface ISidebarItem {
   }[];
 }
 
+export interface IResponse<T> {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: T;
+  meta?: IMeta;
+}
+
+export interface IMeta {
+  page: number;
+  limit: number;
+  total: number;
+}
+
 export type TRole = "ADMIN" | "RIDER" | "DRIVER";
 
 
@@ -23,5 +37,11 @@ export const locationSchema = z.object({
 export const paymentMethods = [
   { label: "Cash", value: "cash" },
   { label: "Card", value: "card" },
-  { label: "Wallet", value: "wallet" },
+ 
+];
+
+export const  VehicleType = [
+  { label: "CAR", value: "CAR" },
+  { label: "BIKE", value: "BIKE" },
+ 
 ];

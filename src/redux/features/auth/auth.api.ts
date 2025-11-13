@@ -44,7 +44,7 @@ export const authApi = baseApi.injectEndpoints({
             transformResponse: (response) => response.data,
         }),
         updateUser: builder.mutation({
-            query: ({ userId, ...data}) => ({
+            query: ({ userId, ...data }) => ({
                 url: `/user/${userId}`,
                 method: "PATCH",
                 data: data,
@@ -58,6 +58,23 @@ export const authApi = baseApi.injectEndpoints({
                 method: "PATCH",
                 params,
             }),
+            invalidatesTags: ["USER"],
+        }),
+        changePassword: builder.mutation({
+            query: (userInfo) => ({
+                url: "/auth/change-password",
+                method: "POST",
+                data: userInfo,
+            }),
+            invalidatesTags: ["USER"],
+        }),
+        setPassword: builder.mutation({
+            query: (userInfo) => ({
+                url: "/auth/set-password",
+                method: "POST",
+                data: userInfo,
+            }),
+            invalidatesTags: ["USER"],
         }),
 
 
@@ -67,9 +84,11 @@ export const authApi = baseApi.injectEndpoints({
 
 
 
-export const { 
+export const {
     useRegisterMutation, useLoginMutation, useUserInfoQuery,
     useLogoutMutation, useAllUserQuery,
     useUpdateUserMutation,
     useResetPasswordMutation,
- } = authApi;
+    useChangePasswordMutation,
+    useSetPasswordMutation,
+} = authApi;

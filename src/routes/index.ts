@@ -13,7 +13,7 @@ import RiderHistory from "@/pages/rider/RiderHistory";
 import Earnings from "@/pages/driver/Earnings";
 import { lazy } from "react";
 import Unauthorized from "@/pages/Unauthorized";
-import  { withAuth } from "@/utils/withAuth";
+import { withAuth } from "@/utils/withAuth";
 import { role } from "@/constants/role";
 import type { TRole } from "@/types";
 import RideRequestForm from "@/pages/RideRequestForm";
@@ -24,7 +24,7 @@ import Contact from "@/pages/Contact";
 import FAQ from "@/pages/FAQ";
 
 
-const Analytics = lazy(() => import("@/pages/admin/AllUser"));
+const Analytics = lazy(() => import("@/pages/admin/Analytics"));
 
 export const router = createBrowserRouter([
     {
@@ -33,8 +33,8 @@ export const router = createBrowserRouter([
         children: [
             {
                 Component: Homepage,
-                index:true,
-                
+                index: true,
+
             },
             {
                 Component: About,
@@ -47,7 +47,7 @@ export const router = createBrowserRouter([
             {
                 Component: Contact,
                 path: "contact",
-            },{
+            }, {
                 Component: FAQ,
                 path: "faq",
             },
@@ -60,10 +60,14 @@ export const router = createBrowserRouter([
                 path: "driver",
             },
             {
-                Component: UpdateUser,
-                path: "UserUpdate",
+                Component: withAuth(UpdateUser),
+                path: "/profile",
             },
-        
+            // {
+            //     Component: UpdateUser,
+            //     path: "UserUpdate",
+            // },
+
         ]
     },
     {
@@ -75,14 +79,14 @@ export const router = createBrowserRouter([
             ...generateRoutes(adminSidebarItems)]
     },
     {
-        Component: withAuth(DashboardLayout, role.RIDER as TRole ),
+        Component: withAuth(DashboardLayout, role.RIDER as TRole),
         path: "/rederDashboard",
         children: [
             { index: true, Component: RiderHistory },
             ...generateRoutes(riderSidebarItems)]
     },
     {
-        Component: withAuth(DashboardLayout, role.DRIVER as TRole ),
+        Component: withAuth(DashboardLayout, role.DRIVER as TRole),
         path: "/driverDashboard",
         children: [
             { index: true, Component: Earnings },

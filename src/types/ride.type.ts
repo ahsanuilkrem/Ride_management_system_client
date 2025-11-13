@@ -7,14 +7,16 @@ export interface IRide {
     destinationLocation: ILocation;
     destinationAddress: string;
     date: Date;
-    time: string;
     status?: RideStatus;
     rideTimestamps?: IRidetimestamps;
     paymentMethod?: paymentMethod;
-    user?: string;
+    fare?: number;
+    vehicleType:VehicleType;
+    userId?: string;
     driver: string;
     payment?: string;
     createdAt:string;
+    updatedAt: string;
 
 }
 
@@ -28,7 +30,7 @@ export interface IRidetimestamps {
     requestedAt?: Date;
     acceptedAt?: Date;
     pickedUpAt?: Date;
-    inTransitAt?: Date;
+    in_transit?: Date;
     completedAt?: Date;
     cancelledAt?: Date;
 }
@@ -40,11 +42,13 @@ export type RideStatus =
     | "in_transit"
     | "completed"
     | "cancelled_by_rider"
-    | "cancelled_by_driver"
-    | "no_driver_available";
+    | "cancelled_by_driver";
+    
 
 export type paymentMethod =
     | "cash"
-    | "card"
-    | "wallet";
+    | "card";
+export type VehicleType =
+  |"CAR"
+  |"BIKE";
 

@@ -350,7 +350,7 @@ export default function AllRides() {
                   {/* <th className="px-4 py-3">Fare & Distance</th> */}
                   <th className="px-4 py-3">Status</th>
                   {/* <th className="px-4 py-3">PaymentId</th> */}
-                  {/* <th className="px-4 py-3">Vehicle</th> */}
+                  <th className="px-4 py-3">Vehicle</th>
                   <th
                     className="px-4 py-3 cursor-pointer select-none"
                     onClick={() => handleSort("createdAt")}
@@ -401,7 +401,7 @@ export default function AllRides() {
                             RideId: {" "} {ride._id}
                           </div>
                           <div className="text-xs text-muted-foreground">
-                            UserId: {ride?.user}
+                            UserId: {ride?.userId}
                           </div>
                           <div className="text-xs text-muted-foreground">
                             DriverId:{" "}
@@ -473,7 +473,7 @@ export default function AllRides() {
                       </td>
                       
                       {/* Vehicle */}
-                      {/* <td className="px-4 py-3">
+                      <td className="px-4 py-3">
                         <Badge
                           variant="outline"
                           className={
@@ -493,7 +493,7 @@ export default function AllRides() {
                             ]?.label
                           }
                         </Badge>
-                      </td> */}
+                      </td>
 
                       {/* Created */}
                          

@@ -3,6 +3,7 @@ import * as React from "react"
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -16,6 +17,7 @@ import Logo from "@/assets/icons/Logo"
 import { Link } from "react-router"
 import { getSidebarItems } from "@/utils/getSidebarItems"
 import { useUserInfoQuery } from "@/redux/features/auth/auth.api"
+import { NavUser } from "./ui/nav-user"
 
 
 
@@ -53,6 +55,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         ))}
       </SidebarContent>
       <SidebarRail />
+       <SidebarFooter>
+        <NavUser user={userData?.data} />
+      </SidebarFooter>
     </Sidebar>
   )
 }

@@ -4,7 +4,7 @@ import { baseApi } from "@/redux/baseApi";
 export const riderApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
         requestRider: builder.mutation({
-                query: (riderData) => ({
+            query: (riderData) => ({
                 url: "/rides/request",
                 method: "POST",
                 data: riderData,
@@ -18,14 +18,18 @@ export const riderApi = baseApi.injectEndpoints({
             }),
         }),
         getmyHistory: builder.query({
-            query: (params) => ({
+            query: (body) => ({
                 url: "/rides/myHistory",
                 method: "GET",
-                params: params,
+                data:body,
+            }),
+            transformResponse: (response) => ({
+                data: response.data,
+                meta: response.meta,
             }),
         }),
 
-       
+
     }),
 
 })
@@ -33,4 +37,4 @@ export const riderApi = baseApi.injectEndpoints({
 
 
 
-export const {useRequestRiderMutation, useGetallrideQuery, useGetmyHistoryQuery, } = riderApi;
+export const { useRequestRiderMutation, useGetallrideQuery, useGetmyHistoryQuery, } = riderApi;
