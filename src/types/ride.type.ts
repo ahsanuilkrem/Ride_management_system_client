@@ -7,10 +7,10 @@ export interface IRide {
     destinationLocation: ILocation;
     destinationAddress: string;
     date: Date;
-    status?: RideStatus;
+    status: RideStatus;
     rideTimestamps?: IRidetimestamps;
     paymentMethod?: paymentMethod;
-    fare?: number;
+    fare: number;
     vehicleType:VehicleType;
     userId?: string;
     driver: string;
@@ -48,6 +48,7 @@ export type RideStatus =
 export type paymentMethod =
     | "cash"
     | "card";
+    
 export type VehicleType =
   |"CAR"
   |"BIKE";

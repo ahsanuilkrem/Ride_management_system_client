@@ -10,14 +10,12 @@ import { toast } from "sonner";
 
 
 const Driver = () => {
-
-
     const [addDriver] = useAddDriverMutation();
-
     const form = useForm({
         defaultValues: {
+            name: "",
             phone: "",
-            address: "",
+            addres: "",
             vehicleType: "",
             vehicleNumber: "",
             vehicleModel: "",
@@ -27,14 +25,7 @@ const Driver = () => {
     });
 
     const onSubmit = async (data: any) => {
-        console.log(data)
-        // const userInfo = {
-        //   name: data.name,
-        //   phone: data.phone,
-        //   password: data.password,
-
-        // }
-
+       
         try {
             const result = await addDriver(data).unwrap();
             console.log(result);
@@ -55,7 +46,7 @@ const Driver = () => {
                 <h2 className="text-2xl font-semibold py-3">Create a Driver</h2>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                        {/* <FormField
+                        <FormField
                             control={form.control}
                             name="name"
                             render={({ field }) => (
@@ -67,7 +58,7 @@ const Driver = () => {
                                     <FormMessage />
                                 </FormItem>
                             )}
-                        /> */}
+                        />
                         <FormField
                             control={form.control}
                             name="phone"
@@ -83,12 +74,12 @@ const Driver = () => {
                         />
                         <FormField
                             control={form.control}
-                            name="address"
+                            name="addres"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Address</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Address" {...field} value={field.value || ""} />
+                                        <Input placeholder="Addres" {...field} value={field.value || ""} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useGetmyHistoryQuery } from "@/redux/features/rider/rider.api";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown, Bike, Car, CreditCard, Eye, MapPin, Search } from "lucide-react";
+import {  Bike, Car, CreditCard, Eye, MapPin, Search } from "lucide-react";
 import type { IRide } from "@/types/ride.type";
 import { FaBangladeshiTakaSign } from "react-icons/fa6";
 import { formatDate } from "@/lib/utils";
@@ -580,7 +580,8 @@ const RiderHistory = () => {
                     Driver ID
                   </label>
                   <p className="font-mono text-sm bg-muted/50 p-2 rounded">
-                    {selectedRide.driver}
+                     {selectedRide.driver},
+                    
                   </p>
                 </div>
               </div>

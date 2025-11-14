@@ -1,5 +1,7 @@
 
 import { baseApi } from "@/redux/baseApi";
+import type { IResponse } from "@/types";
+import type { IRide, RideStatus } from "@/types/ride.type";
 
 export const riderApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
@@ -21,12 +23,23 @@ export const riderApi = baseApi.injectEndpoints({
             query: (body) => ({
                 url: "/rides/myHistory",
                 method: "GET",
-                data:body,
+                data: body,
             }),
             transformResponse: (response) => ({
                 data: response.data,
                 meta: response.meta,
             }),
+        }),
+        updateRideStatus: builder.mutation<
+            IResponse<IRide>,
+            { rideId: string; rideStatus: RideStatus }
+        >({
+            query: ({ rideId, rideStatus }) => ({
+                url: `/rides/rideStatus/${rideId}`,
+                method: "PATCH",
+                data: { rideStatus },
+            }),
+            invalidatesTags: ["RIDER"],
         }),
 
 
@@ -37,4 +50,9 @@ export const riderApi = baseApi.injectEndpoints({
 
 
 
-export const { useRequestRiderMutation, useGetallrideQuery, useGetmyHistoryQuery, } = riderApi;
+export const { 
+    useRequestRiderMutation, 
+    useGetallrideQuery, 
+    useGetmyHistoryQuery,
+    useUpdateRideStatusMutation,
+  } = riderApi;

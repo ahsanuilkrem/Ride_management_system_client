@@ -1,4 +1,3 @@
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router";
@@ -37,8 +36,9 @@ import { FaBangladeshiTakaSign } from "react-icons/fa6";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 import { useGetallrideQuery, useUpdateRideStatusMutation } from "@/redux/features/rider/rider.api";
+import { useGetDriverMyProfileQuery, useUpdateMyProfileMutation } from "@/redux/features/driver/driver.api";
 import type { IRide } from "@/types/ride.type";
-import { useGetDriverMyProfileQuery } from "@/redux/features/driver/driver.api";
+
 
 const statusConfig = {
   REQUESTED: {
@@ -72,7 +72,7 @@ const fareRangeConfig: Record<string, FareRange> = {
   high: { label: "High (>৳500)", min: 500 },
 };
 
-export default function DriverAction() {
+export default function GetRide() {
   const navigate = useNavigate();
   const [showOfflineModal, setShowOfflineModal] = useState(false);
   const {
@@ -82,14 +82,12 @@ export default function DriverAction() {
     refetch,
   } = useGetallrideQuery({});
 
-  console.log("All Rides Data:", allRidesData);
+  // console.log("All Rides Data:", allRidesData);
 
   const [updateRideStatus] = useUpdateRideStatusMutation();
 
   const { data: driverProfile, refetch: refetchDriver } =
     useGetDriverMyProfileQuery();
-
-  // const [updateAvailability] = useUpdateAvailabilityMutation();
 
   const [filters, setFilters] = useState({
     search: "",
@@ -114,42 +112,46 @@ export default function DriverAction() {
     return allRides.filter((ride: IRide) => ride.status === "requested");
   }, [allRides]);
 
-  console.log("Requested Rides:", requestedRides);
+  // console.log("Requested Rides:", requestedRides);
 
   // Apply filters and sorting
   const filteredAndSortedRides = useMemo(() => {
     let filtered: IRide[] = [...requestedRides];
 
     // Search filter
-    // if (filters.search) {
-    //   const searchLower = filters.search.toLowerCase();
-    //   filtered = filtered.filter(
-    //     (ride: IRide) =>
-    //       ride.pickupLocation.lat.toLowerCase().includes(searchLower) ||
-    //       ride.destinationLocation.name.toLowerCase().includes(searchLower)
-    //   );
-    // }
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase();
+      filtered = filtered.filter(
+        (ride: IRide) =>
+          ride.pickupAddress.toLowerCase().includes(searchLower) ||
+          ride.destinationAddress.toLowerCase().includes(searchLower)
+      );
+    }
 
     // Vehicle type filter
-   
+    if (filters.vehicleType !== "all") {
+      filtered = filtered.filter(
+        (ride: IRide) => ride.vehicleType === filters.vehicleType
+      );
+    }
 
     // Fare range filter
-    // if (filters.fareRange !== "all") {
-    //   const range =
-    //     fareRangeConfig[filters.fareRange as keyof typeof fareRangeConfig];
-    //   if (range) {
-    //     filtered = filtered.filter((ride: IRide) => {
-    //       if (range.min !== undefined && range.max !== undefined) {
-    //         return ride.fare >= range.min && ride.fare <= range.max;
-    //       } else if (range.max !== undefined) {
-    //         return ride.fare < range.max;
-    //       } else if (range.min !== undefined) {
-    //         return ride.fare > range.min;
-    //       }
-    //       return true;
-    //     });
-    //   }
-    // }
+    if (filters.fareRange !== "all") {
+      const range =
+        fareRangeConfig[filters.fareRange as keyof typeof fareRangeConfig];
+      if (range) {
+        filtered = filtered.filter((ride: IRide) => {
+          if (range.min !== undefined && range.max !== undefined) {
+            return ride?.fare >= range.min && ride.fare <= range.max;
+          } else if (range.max !== undefined) {
+            return ride.fare < range.max;
+          } else if (range.min !== undefined) {
+            return ride.fare > range.min;
+          }
+          return true;
+        });
+      }
+    }
 
     // Sorting
     filtered.sort((a, b) => {
@@ -216,7 +218,7 @@ export default function DriverAction() {
     try {
       await updateRideStatus({
         rideId: (ride as any)._id,
-        rideStatus: "ACCEPTED",
+        rideStatus: "accepted",
       }).unwrap();
 
       await updateMyProfile({ availability: "ON_TRIP" }).unwrap();
@@ -236,7 +238,7 @@ export default function DriverAction() {
     try {
       await updateRideStatus({
         rideId: (ride as any)._id,
-        rideStatus: "REJECTED",
+        rideStatus: "cancelled_by_driver",
       }).unwrap();
       toast.success("Ride rejected successfully!");
       refetch();
@@ -286,22 +288,7 @@ export default function DriverAction() {
             Available ride requests. Accept to start earning!
           </p>
         </div>
-        {/* <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            onClick={() => refetch()}
-            disabled={isLoading}
-            className="flex items-center gap-2"
-          >
-            <RefreshCw
-              className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
-            />
-            Refresh
-          </Button>
-          <Button variant="outline" onClick={clearFilters}>
-            Clear Filters
-          </Button>
-        </div> */}
+        
 
         <div className="flex flex-wrap items-center gap-3">
           {/* Availability Toggle */}
@@ -541,7 +528,10 @@ export default function DriverAction() {
                               .toUpperCase()}
                           </div>
                           <div className="text-xs text-muted-foreground">
-                            Rider: {String((ride as any).riderId).slice(-6)}
+                            Rider: {String(ride.userId).slice(-6)}
+                          </div>
+                           <div className="text-xs text-muted-foreground">
+                            DriverId: {String(ride.driver).slice(-6)}
                           </div>
                         </div>
                       </td>
@@ -556,7 +546,7 @@ export default function DriverAction() {
                                 From
                               </div>
                               <div className="text-muted-foreground truncate max-w-[150px]">
-                                {ride.pickupLocation.name}
+                                {ride.pickupAddress}
                               </div>
                             </div>
                           </div>
@@ -565,7 +555,7 @@ export default function DriverAction() {
                             <div className="text-xs">
                               <div className="font-medium text-red-700">To</div>
                               <div className="text-muted-foreground truncate max-w-[150px]">
-                                {ride.destinationLocation.name}
+                                {ride.destinationAddress}
                               </div>
                             </div>
                           </div>
@@ -582,7 +572,7 @@ export default function DriverAction() {
                             </span>
                           </div>
                           <div className="text-xs text-muted-foreground">
-                            {ride.distance.toFixed(1)} km
+                            {ride.paymentMethod}
                           </div>
                         </div>
                       </td>
@@ -700,14 +690,16 @@ export default function DriverAction() {
             <Button
               className="bg-red-600 hover:bg-red-700"
               onClick={async () => {
-                await updateMyProfile({ availability: "UNAVAILABLE" }).unwrap();
+               const availabil =  await updateMyProfile({ availability: "UNAVAILABLE" }).unwrap();
+               console.log("availabil",availabil)
                 await refetchDriver();
                 toast.info("You are currently offline.");
-                setShowOfflineModal(false);
+                 setShowOfflineModal(false);
               }}
             >
               Go Offline
             </Button>
+            
           </DialogFooter>
         </DialogContent>
       </Dialog>
