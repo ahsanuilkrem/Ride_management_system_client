@@ -80,25 +80,24 @@ export interface IDriverEarnings {
   rides: IDriverEarningRide[];
 }
 
+export interface ILocation {
+  lat: number;
+  lng: number;
+ 
+};
+
 export interface IDriverEarningRide {
   _id: string;
-  riderId: string;
-  driverId: string;
-  pickupLocation: {
-    type: string;
-    coordinates: number[];
-    name: string;
-  };
-  destinationLocation: {
-    type: string;
-    coordinates: number[];
-    name: string;
-  };
+  userId: string;
+  driver: string;
+  pickupLocation: ILocation;
+  pickupAddress: string;
+  destinationLocation: ILocation;
+  destinationAddress: string;
   fare: number;
-  distance: number;
   status: string;
   vehicleType: string;
-  timestamps: {
+  rideTimestamps: {
     requestedAt: string;
     acceptedAt: string;
     pickedUpAt: string;

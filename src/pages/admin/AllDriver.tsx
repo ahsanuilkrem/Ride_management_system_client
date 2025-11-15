@@ -176,7 +176,6 @@ const AllDriver: React.FC = () => {
     _id :string, 
     newStatus: DriverStatus
   ) => {
-     console.log("driverId", _id, newStatus)
     try {
      await updateDriverStatus({
        driverId:_id,

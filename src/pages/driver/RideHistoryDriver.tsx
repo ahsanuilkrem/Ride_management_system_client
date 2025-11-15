@@ -340,7 +340,7 @@ export default function RideHistoryDriver() {
 
   const { data, isLoading, error, refetch } =
     useGetDriverRideHistoryQuery(cleanQueryParams);
-console.log("ride his", data)
+
   const handleFilterChange = useCallback(
     (key: keyof IDriverRideHistoryQuery, value: string | number) => {
       setFilters((prev) => ({
@@ -794,7 +794,7 @@ console.log("ride his", data)
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {rides.map((ride: IRide | IPopulatedRide) => (
+                  {rides?.map((ride: IRide | IPopulatedRide) => (
                     <TableRow key={ride._id}>
                       <TableCell>
                         <RideDetails ride={ride} />
@@ -805,7 +805,7 @@ console.log("ride his", data)
                             <User className="h-4 w-4 text-muted-foreground" />
                             <span className="font-medium">
                               {isPopulatedRide(ride)
-                                ? (ride as IPopulatedRide).riderId.name
+                                ? (ride as IPopulatedRide).riderId?.name
                                 : "Unknown"}
                             </span>
                           </div>
@@ -813,12 +813,12 @@ console.log("ride his", data)
                             <>
                               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <Phone className="h-3 w-3" />
-                                {(ride as IPopulatedRide).riderId.phone ||
+                                {(ride as IPopulatedRide).riderId?.phone ||
                                   "N/A"}
                               </div>
                               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <Mail className="h-3 w-3" />
-                                {(ride as IPopulatedRide).riderId.email}
+                                {(ride as IPopulatedRide).riderId?.email}
                               </div>
                             </>
                           )}

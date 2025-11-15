@@ -83,6 +83,7 @@ export default function UpdateUser () {
   const [showSetConfirmPassword, setShowSetConfirmPassword] = useState(false);
 
   const user = userData?.data;
+  console.log("user", user)
   // const isGoogleUser = user?.auths?.some((auth) => auth.provider === "google");
   // Check if user has a password set - this will determine which password form to show
   const hasPassword = Boolean(user?.password && user.password.length > 0);
@@ -136,8 +137,8 @@ export default function UpdateUser () {
 
   // Handle profile update
   const onProfileSubmit = async (data: ProfileUpdateData) => {
-    console.log("Profile form submitted with data:", data);
-    console.log("isEditingProfile state:", isEditingProfile);
+    // console.log("Profile form submitted with data:", data);
+    // console.log("isEditingProfile state:", isEditingProfile);
 
     if (!isEditingProfile) {
       console.log("Form submitted but not in edit mode, preventing submission");
@@ -154,14 +155,14 @@ export default function UpdateUser () {
       picture: data.picture || undefined,
     };
 
-    console.log("Cleaned data being sent:", cleanedData);
+    // console.log("Cleaned data being sent:", cleanedData);
 
     try {
-      await updateUser({
-        userId: user._id,
+     const userupdate =  await updateUser({
+        id: user._id,
         payload: cleanedData,
       }).unwrap();
-
+      console.log("userupdate", userupdate)
       toast.success("Profile updated successfully!");
       setIsEditingProfile(false);
       refetch();

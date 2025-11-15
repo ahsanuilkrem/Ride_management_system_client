@@ -1,8 +1,8 @@
-
-
-import Features from "@/components/modules/HomePage/Features";
 import HeroSection from "@/components/modules/HomePage/HeroSection";
 import About from "./About";
+import ServiceHighlights from "@/components/modules/HomePage/ServiceHighlights";
+import Testimonials from "@/components/modules/HomePage/Testimonials";
+import CallToAction from "@/components/modules/HomePage/CallToAction";
 
 
 
@@ -13,8 +13,10 @@ const Homepage = () => {
         <div className="">
           
            <HeroSection></HeroSection>
-           <Features></Features>
+           <ServiceHighlights />
+           <Testimonials />
            <About></About>
+           <CallToAction /> 
           
         
         </div>

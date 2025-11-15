@@ -18,13 +18,15 @@ const HeroSection = () => {
                             Fast, safe, and affordable rides — whenever and wherever you need them. Join millions who ride with us every day.
                         </p>
 
+                        <p className="text-lg sm:text-xl mb-8">
+                            Book a ride in seconds, track your driver in real-time, and enjoy a safe and seamless journey with our trusted drivers.
+                        </p>
+
                         <div className="flex flex-col gap-4 sm:flex-row">
                             <button className="bg-primary text-white px-6 py-3 rounded-md hover:bg-primary/90 transition">
                                 <Link to="rider">Book a Ride</Link>
                             </button>
-                            <button className="border border-primary text-primary px-6 py-3 rounded-md hover:bg-primary hover:text-white transition">
-                                <Link to="driver">Become a Driver</Link>
-                            </button>
+                           
                         </div>
 
                     </div >

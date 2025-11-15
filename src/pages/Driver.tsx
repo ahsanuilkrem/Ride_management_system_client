@@ -28,7 +28,7 @@ const Driver = () => {
        
         try {
             const result = await addDriver(data).unwrap();
-            console.log(result);
+            // console.log(result);
             if (result.success) {
                 toast.success("driver created successfully");
             }

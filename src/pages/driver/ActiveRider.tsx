@@ -3,7 +3,6 @@ import React, { useEffect, useMemo,  } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useUserInfoQuery } from "@/redux/features/auth/auth.api";
 import {
   MapPin,
   Car,
@@ -113,14 +112,12 @@ export default function ActiveRides() {
     refetch,
   } = useGetallrideQuery({});
 
-  console.log("allrider", allRidesData)
 
   const [updateRideStatus] = useUpdateRideStatusMutation();
   const [updateMyProfile] = useUpdateMyProfileMutation();
   const { data: driverProfile, refetch: refetchDriver } = useGetDriverMyProfileQuery();
-  const { data: me } = useUserInfoQuery({});
-  console.log(me)
-  
+  // const { data: me } = useUserInfoQuery({});
+ 
   // Ensure allRides is always an array (supports both IRide[] and { data: IRide[]; meta })
   const allRides: IRide[] = useMemo(() => {
     const raw: any = allRidesData;
@@ -129,24 +126,9 @@ export default function ActiveRides() {
     return [];
   }, [allRidesData]);
 
-  // console.log("allRides", allRides)
-
-  // Filter rides to show only active ones (not REQUESTED or REJECTED)
-  // const activeRides = useMemo(() => {
-  //   return allRides.filter(
-  //     (ride) =>
-  //       ride.status !== "REQUESTED" &&
-  //       ride.status !== "REJECTED" &&
-  //       ride.status !== "CANCELLED"
-  //   );
-  // }, [allRides]);
-
-  
-
   const activeRides: IRide[] = useMemo(() => {
-    // const userId = me?.data?._id;
     const driverId = driverProfile?._id
-      console.log("driverId", driverId)
+     
     return allRides
       .filter((ride) => ride.driver === driverId)
       .filter(

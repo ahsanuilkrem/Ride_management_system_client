@@ -31,11 +31,7 @@ export const adminSidebarItems: ISidebarItem[] = [
         url: "/admin/allDriver",
         component: AllDriver
       },
-      // {
-      //   title: "UpdateProfile",
-      //   url: "/admin/UserUpdate",
-      //   component: UpdateUser
-      // },
+      
       
 
     ],

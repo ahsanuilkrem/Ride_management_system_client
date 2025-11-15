@@ -10,7 +10,6 @@ import { adminSidebarItems } from "./adminSidebarItems";
 import { riderSidebarItems } from "./riderSidebarItems";
 import { driverSidebarItems } from "./driverSidebarItems";
 import RiderHistory from "@/pages/rider/RiderHistory";
-import Earnings from "@/pages/driver/Earnings";
 import { lazy } from "react";
 import Unauthorized from "@/pages/Unauthorized";
 import { withAuth } from "@/utils/withAuth";
@@ -22,6 +21,7 @@ import Homepage from "@/pages/Homepage";
 import Features from "@/pages/Features";
 import Contact from "@/pages/Contact";
 import FAQ from "@/pages/FAQ";
+import DriverEarning from "@/pages/driver/DriverEarning";
 
 
 const Analytics = lazy(() => import("@/pages/admin/Analytics"));
@@ -63,10 +63,7 @@ export const router = createBrowserRouter([
                 Component: withAuth(UpdateUser),
                 path: "/profile",
             },
-            // {
-            //     Component: UpdateUser,
-            //     path: "UserUpdate",
-            // },
+            
 
         ]
     },
@@ -89,7 +86,7 @@ export const router = createBrowserRouter([
         Component: withAuth(DashboardLayout, role.DRIVER as TRole),
         path: "/driverDashboard",
         children: [
-            { index: true, Component: Earnings },
+            { index: true, Component: DriverEarning },
             ...generateRoutes(driverSidebarItems)]
     },
     {

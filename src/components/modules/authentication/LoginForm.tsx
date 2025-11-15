@@ -25,12 +25,12 @@ const LoginForm = ({
         navigate("/");
       }
       
-    } catch (err) {
+    } catch (err: unknown) {
       console.error(err);
 
-      if(err.data.message  === "password does not match"){
-        toast.error("Invalid credentials")
-      }
+      // if(err.data.message  === "password does not match"){
+      //   toast.error("Invalid credentials")
+      // }
 
       // if (err.data.message === "user is Verified") {
       //   toast.error("Your account is not verified");

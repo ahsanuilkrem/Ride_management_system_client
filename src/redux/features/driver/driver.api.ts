@@ -1,6 +1,6 @@
 import { baseApi } from "@/redux/baseApi";
 import type { IResponse } from "@/types";
-import type { DriverStatus, IDriver, IDriverProfile, IDriverRideHistoryQuery, IDriverRideHistoryResponse, IUpdateMyDriverProfile } from "@/types/driver.type";
+import type { DriverStatus, IDriver, IDriverEarnings, IDriverProfile, IDriverRideHistoryQuery, IDriverRideHistoryResponse, IUpdateMyDriverProfile } from "@/types/driver.type";
 
 
 export const driverApi = baseApi.injectEndpoints({
@@ -68,18 +68,15 @@ export const driverApi = baseApi.injectEndpoints({
             providesTags: ["DRIVER"],
         }),
 
-        availabilityUpdate: builder.mutation({
-            query: ({ driverId, availability }) => ({
-                url: `/availability/${driverId}`,
-                method: "PATCH",
-                data: { availability, }
-
+        getMyEarningSummaryDriver: builder.query<IDriverEarnings, void>({
+            query: () => ({
+                url: "/rides/earnings",
+                method: "GET",
             }),
-            invalidatesTags: ["DRIVER"],
+            providesTags: ["DRIVER"],
+            transformResponse: (response: IResponse<IDriverEarnings>) =>
+                response.data,
         }),
-
-
-
 
     }),
 })
@@ -93,6 +90,6 @@ export const {
     useUpdateDriverStatusMutation,
     useUpdateMyProfileMutation,
     useGetDriverMyProfileQuery,
-    useAvailabilityUpdateMutation,
     useGetDriverRideHistoryQuery,
- } = driverApi;
+    useGetMyEarningSummaryDriverQuery,
+} = driverApi;

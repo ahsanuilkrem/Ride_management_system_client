@@ -18,7 +18,7 @@ import {
 //   Sidebar,
 } from "@/components/ui/sidebar";
 import { Link, useNavigate } from "react-router";
-import { LogOut, Settings, User } from "lucide-react";
+import { LogOut,  User } from "lucide-react";
 import { authApi, useLogoutMutation } from "@/redux/features/auth/auth.api";
 import { useAppDispatch } from "@/redux/hook";
 import type { IUser } from "@/types/user.type";
@@ -39,7 +39,7 @@ export function NavUser({ user }: { user?: IUser }) {
   const handleLogout = async () => {
     await logout(undefined);
     dispatch(authApi.util.resetApiState());
-    navigate("/");
+    navigate("/login");
   };
 
   return (
@@ -127,13 +127,13 @@ export function NavUser({ user }: { user?: IUser }) {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link
+                {/* <Link
                   to="/settings"
                   className="flex items-center gap-2 cursor-pointer"
                 >
                   <Settings className="h-4 w-4" />
                   <span>Settings</span>
-                </Link>
+                </Link> */}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
