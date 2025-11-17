@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import clsx from "clsx";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ import {
 import { useAllUserQuery, useUpdateUserMutation, useUserInfoQuery } from "@/redux/features/auth/auth.api";
 import { IsActive, Role, type IUser } from "@/types/user.type";
 import { roleMapper, statusMapper } from "@/utils/mappers";
+import { toast } from "sonner";
 
 export default function AllUser() {
 
@@ -77,8 +79,6 @@ export default function AllUser() {
     total: users.length,
   };
 
-  //   console.log(meta)
-  //  console.log(users);
 
   const totalItems = meta.total ?? users.length;
   const pageFromMeta = meta.page ?? filters.page;
@@ -183,16 +183,17 @@ export default function AllUser() {
       return 0;
     });
 
-    console.log("Sorting completed. Result length:", copy.length);
     return copy;
   }, [filteredUsers, filters.sortBy, filters.sortOrder]);
 
-  const handleUpdate = async (userId: string, payload: Partial<IUser>) => {
+  const handleUpdate = async (_id: string, payload: Partial<IUser>) => {
     try {
-      await updateUser({ userId, payload }).unwrap();
+      await updateUser({ id: _id, payload }).unwrap();
       await refetch();
-    } catch {
-      // toast already handled globally if any
+      toast.success("user profile updated successfully")
+    } catch (error) {
+       toast.error("update user Failed ")
+       console.error("Error updating user Failed:", error);
     }
   };
 
@@ -495,8 +496,7 @@ export default function AllUser() {
                           const me = meResponse?.data;
                           const isSelf = me?._id === u._id;
                           const amAdmin = me?.role === Role.ADMIN;
-                          const canModify =
-                            !isSelf && !(amAdmin);
+                           const canModify = amAdmin && !isSelf ;
                           return (
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>

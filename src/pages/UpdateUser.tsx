@@ -83,7 +83,7 @@ export default function UpdateUser () {
   const [showSetConfirmPassword, setShowSetConfirmPassword] = useState(false);
 
   const user = userData?.data;
-  console.log("user", user)
+
   // const isGoogleUser = user?.auths?.some((auth) => auth.provider === "google");
   // Check if user has a password set - this will determine which password form to show
   const hasPassword = Boolean(user?.password && user.password.length > 0);
@@ -155,14 +155,14 @@ export default function UpdateUser () {
       picture: data.picture || undefined,
     };
 
-    // console.log("Cleaned data being sent:", cleanedData);
+    console.log("Cleaned data being sent:", cleanedData);
 
     try {
-     const userupdate =  await updateUser({
+       await updateUser({
         id: user._id,
         payload: cleanedData,
       }).unwrap();
-      console.log("userupdate", userupdate)
+      // console.log("userupdate", userupdate)
       toast.success("Profile updated successfully!");
       setIsEditingProfile(false);
       refetch();
@@ -178,7 +178,9 @@ export default function UpdateUser () {
           ? error.data.message
           : "Failed to update profile";
       toast.error(errorMessage);
+        console.log(error)
     }
+  
   };
 
   // Handle password change (for users who already have a password)

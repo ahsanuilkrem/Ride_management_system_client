@@ -1,5 +1,5 @@
 import { baseApi } from "@/redux/baseApi";
-// import type { IResponse, ISendOtp, IVerifyOtp } from "@/types";
+
 
 
 export const authApi = baseApi.injectEndpoints({
@@ -44,10 +44,10 @@ export const authApi = baseApi.injectEndpoints({
             transformResponse: (response) => response.data,
         }),
         updateUser: builder.mutation({
-            query: ({ userId, ...data }) => ({
-                url: `/user/${userId}`,
+            query: ({ id, payload }) => ({
+                url: `/user/updateUser/${id}`,
                 method: "PATCH",
-                data: data,
+                 data: payload,
 
             }),
             invalidatesTags: ["USER"],
