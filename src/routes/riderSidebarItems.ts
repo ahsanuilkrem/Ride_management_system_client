@@ -1,3 +1,4 @@
+import ActiveRider from "@/pages/rider/ActiveRider";
 import DirverReguest from "@/pages/rider/DirverReguest";
 import RequestRide from "@/pages/rider/RequestRide";
 import RiderHistory from "@/pages/rider/RiderHistory";
@@ -13,6 +14,11 @@ export const riderSidebarItems: ISidebarItem[] = [
                 url: "/rederDashboard/requestRide",
                 component: RequestRide
             },
+             {
+                title: "ActiveRider",
+                url: "/rederDashboard/activeRider",
+                component: ActiveRider
+            },
             {
                 title: "Rider History",
                 url: "/rederDashboard/riderHistory",
@@ -24,11 +30,7 @@ export const riderSidebarItems: ISidebarItem[] = [
                 url: "/rederDashboard/driverReguest",
                 component: DirverReguest
             }
-            // {
-            //     title: "ActiveRider",
-            //     url: "/rederDashboard/activeRider",
-            //     component: ActiveRider
-            // }
+           
             
         ],
     },

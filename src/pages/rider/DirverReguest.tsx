@@ -4,7 +4,7 @@ import Driver from "../Driver";
 const DirverReguest = () => {
     return (
         <div>
-            <Driver></Driver>
+            <Driver />
         </div>
     );
 };

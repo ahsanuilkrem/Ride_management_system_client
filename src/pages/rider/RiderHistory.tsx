@@ -1,23 +1,22 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from "react";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useMemo, useState } from "react";
 import { useGetmyHistoryQuery } from "@/redux/features/rider/rider.api";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {  Bike, Car, CreditCard, Eye, MapPin, Search } from "lucide-react";
+import { ArrowUpDown, Bike, Calendar, Car, ChevronLeft, ChevronRight, CreditCard, Eye, Loader2, MapPin, RefreshCw, Search } from "lucide-react";
 import type { IRide } from "@/types/ride.type";
 import { FaBangladeshiTakaSign } from "react-icons/fa6";
-import { formatDate } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 
 const formatTime = (dateString: string | Date) => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
+  const date = new Date(dateString);
+  return date.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
 
 const statusConfig = {
   requested: {
@@ -40,7 +39,7 @@ const statusConfig = {
     label: "Completed",
     color: "bg-green-100 text-green-800 border-green-200",
   },
-   cancelled_by_driver: {
+  cancelled_by_driver: {
     label: "cancelled_by_driver",
     color: "bg-red-100 text-red-800 border-red-200",
   },
@@ -65,120 +64,415 @@ const vehicleTypeConfig = {
 };
 
 const RiderHistory = () => {
-  
-  const [page, setPage] = useState(1);
-  const [filters, setFilters] = useState({
-    status: "",
+
+  const [filters, setFilters] = useState<{
+    search: string;
+    status: string | "all";
+    vehicleType: string | "all";
+    fareRange: string | "all";
+    dateRange: string | "all";
+    page: number;
+    limit: number;
+    sortBy?: string;
+    sortOrder?: "asc" | "desc";
+  }>({
     search: "",
-    date: "",
-    fare:"",
-    vehicleType: "",
-   
+    status: "all",
+    vehicleType: "all",
+    fareRange: "all",
+    dateRange: "all",
+    page: 1,
+    limit: 10,
   });
 
   const [selectedRide, setSelectedRide] = useState<IRide | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
-  
-  const { data, isLoading, isError } = useGetmyHistoryQuery({ });
-  const rides = data?.data || [];
-  const meta = data?.meta;
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setPage(1); // reset to page 1 on filter change
-    setFilters((prev) => ({ ...prev, [name]: value }));
+  const {
+    data,
+    isLoading,
+    error,
+    refetch,
+  } = useGetmyHistoryQuery({});
+
+  const rides = data?.data || [];
+//  const meta = data?.meta;
+  
+  const ridesArray = Array.isArray(rides) ? rides : [];
+  // console.log("redes", rides)
+  // console.log("redesArray", ridesArray)
+
+  const clearFilters = () => {
+    setFilters({
+      search: "",
+      status: "all",
+      vehicleType: "all",
+      fareRange: "all",
+      dateRange: "all",
+      page: 1,
+      limit: filters.limit,
+    });
   };
 
-  // const clearFilters = () => {
-  //   setFilters({
-  //     search: "",
-  //     status: "all",
-  //     vehicleType: "all",
-  //     fare: "all",
-  //     date: "all",
-  //     page: 1,
-  //     limit: filters.limit,
-  //   });
-  // };
-  
-  // const handleSort = (key: string) => {
-  //   setFilters((f) => ({
-  //     ...f,
-  //     sortBy: key,
-  //     sortOrder: f.sortBy === key && f.sortOrder === "asc" ? "desc" : "asc",
-  //   }));
-  // };
+  const handleSort = (key: string) => {
+    setFilters((f) => ({
+      ...f,
+      sortBy: key,
+      sortOrder: f.sortBy === key && f.sortOrder === "asc" ? "desc" : "asc",
+    }));
+  };
 
-   const handleViewDetails = (ride: IRide) => {
+
+  // Client-side filtering
+  const filteredRides = useMemo(() => {
+    const term = filters.search.trim().toLowerCase();
+    return ridesArray.filter((ride: IRide) => {
+      const matchesSearch =
+        term === "" ||
+        ride.pickupAddress.toLowerCase().includes(term) ||
+        ride.destinationAddress.toLowerCase().includes(term) ||
+        ride.driver?.toLowerCase().includes(term);
+
+      const matchesStatus =
+        filters.status === "all" || ride.status === filters.status;
+      const matchesVehicleType =
+        filters.vehicleType === "all" ||
+        ride.vehicleType === filters.vehicleType;
+
+      let matchesFareRange = true;
+      if (filters.fareRange !== "all") {
+        const fare = ride.fare;
+        switch (filters.fareRange) {
+          case "low":
+            matchesFareRange = fare < 199;
+            break;
+          case "medium":
+            matchesFareRange = fare >= 200 && fare < 499;
+            break;
+          case "high":
+            matchesFareRange = fare >= 500;
+            break;
+        }
+      }
+
+      let matchesDateRange = true;
+      if (filters.dateRange !== "all") {
+        const rideDate = new Date(ride.createdAt);
+        const now = new Date();
+        const diffTime = Math.abs(now.getTime() - rideDate.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        switch (filters.dateRange) {
+          case "today":
+            matchesDateRange = diffDays <= 1;
+            break;
+          case "week":
+            matchesDateRange = diffDays <= 7;
+            break;
+          case "month":
+            matchesDateRange = diffDays <= 30;
+            break;
+          case "year":
+            matchesDateRange = diffDays <= 365;
+            break;
+        }
+      }
+
+      return (
+        matchesSearch &&
+        matchesStatus &&
+        matchesVehicleType &&
+        matchesFareRange &&
+        matchesDateRange
+      );
+    });
+  }, [
+    rides,
+    filters.search,
+    filters.status,
+    filters.vehicleType,
+    filters.fareRange,
+    filters.dateRange,
+  ]);
+
+  // Client-side sorting
+  const sortedRides = useMemo(() => {
+    if (!filters.sortBy) return filteredRides;
+
+    const sortKey = filters.sortBy as keyof IRide;
+    const direction = filters.sortOrder === "asc" ? 1 : -1;
+
+    const copy = [...filteredRides];
+
+    copy.sort((a, b) => {
+      const aVal = a[sortKey];
+      const bVal = b[sortKey];
+
+      if (aVal == null && bVal == null) return 0;
+      if (aVal == null) return 1 * direction;
+      if (bVal == null) return -1 * direction;
+
+      if (sortKey === "createdAt" || sortKey === "updatedAt") {
+        const aNum = new Date(aVal as string).getTime();
+        const bNum = new Date(bVal as string).getTime();
+        if (aNum < bNum) return -1 * direction;
+        if (aNum > bNum) return 1 * direction;
+        return 0;
+      }
+
+      // if (sortKey === "fare" || sortKey === "distance") {
+      //   const aNum = Number(aVal);
+      //   const bNum = Number(bVal);
+      //   if (aNum < bNum) return -1 * direction;
+      //   if (aNum > bNum) return 1 * direction;
+      //   return 0;
+      // }
+
+      const aStr = String(aVal).toLowerCase();
+      const bStr = String(bVal).toLowerCase();
+
+      if (aStr < bStr) return -1 * direction;
+      if (aStr > bStr) return 1 * direction;
+      return 0;
+    });
+
+    return copy;
+  }, [filteredRides, filters.sortBy, filters.sortOrder]);
+
+  // Pagination
+  const totalPages = Math.ceil(sortedRides.length / filters.limit);
+  const startIndex = (filters.page - 1) * filters.limit;
+  const endIndex = startIndex + filters.limit;
+  const paginatedRides = sortedRides.slice(startIndex, endIndex);
+
+  const handlePageChange = (nextPage: number) => {
+    setFilters((f) => ({
+      ...f,
+      page: Math.min(Math.max(1, nextPage), totalPages),
+    }));
+  };
+
+  const handleViewDetails = (ride: IRide) => {
     setSelectedRide(ride);
     setShowDetailsModal(true);
-  
+
   };
 
-  if (isLoading) return <p>Loading...</p>;
-  if (isError) return <p>Something went wrong. Please try again later.</p>;
+  const formatDate = (dateString: string | Date) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-muted-foreground">Loading ride history...</p>
+        </div>
+      </div>
+    );
+  }
+
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">Error loading ride history</p>
+          <Button onClick={() => refetch()}>Try Again</Button>
+        </div>
+      </div>
+    );
+  }
+
+
 
   return (
     <div className="w-full mx-auto space-y-6">
       <h1 className="text-3xl font-extrabold mb-4">My Ride History</h1>
 
-      {/* Filters */}
-      <Card className="p-2">
-        <h2 className="text-3xl font-bold">Filters & Search</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <input
-          type="text"
-          name="search"
-          placeholder="Search by location"
-          value={filters.search}
-          onChange={handleInputChange}
-          className="border px-3 py-2 rounded w-full"
-        />
+          <h1 className="text-3xl font-bold tracking-tight">Ride History</h1>
+          <p className="text-muted-foreground">
+            View and manage your complete ride history
+          </p>
         </div>
-        <div>
-         
-          <select
-          name="status"
-          value={filters.status}
-          onChange={handleInputChange}
-          className="border px-3 py-2 rounded w-full"
-        >
-          <option value="">All Status</option>
-          <option value="requested">Requested</option>
-          <option value="acceptedAt">AcceptedAt</option>
-          <option value="pickedUpAt">PickedUpAt</option>
-           <option value="in_transit">In_transit</option>
-          <option value="completedAt">Completed</option>
-          <option value="cancelled_by_rider">Cancelled_by_rider</option>
-          <option value="cancelled_by_driver">Cancelled_by_driver</option>
-        </select>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={() => refetch()}
+            disabled={isLoading}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw
+              className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+            />
+            Refresh
+          </Button>
+          <Button variant="outline" onClick={clearFilters}>
+            Clear Filters
+          </Button>
         </div>
-        
-        <div>
-          <input
-          type="date"
-          name="date"
-          value={filters.date}
-          onChange={handleInputChange}
-          className="border px-3 py-2 rounded w-full"
-        />
-        </div>
-     
-       <div>
-         <input
-          type="number"
-          name="fare"
-          value={filters.fare}
-          onChange={handleInputChange}
-          placeholder="Fare"
-          className="border px-3 py-2 rounded w-full"
-        />
-       </div>
-        
       </div>
+
+
+       {/* Filters */}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            Filters & Search
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Search</label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search locations, drivers..."
+                  value={filters.search}
+                  onChange={(e) =>
+                    setFilters((f) => ({
+                      ...f,
+                      search: e.target.value,
+                      page: 1,
+                    }))
+                  }
+                  className="pl-10"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Status</label>
+              <Select
+                value={filters.status}
+                onValueChange={(value) =>
+                  setFilters((f) => ({ ...f, status: value, page: 1 }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="All Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  {Object.entries(statusConfig).map(([key, config]) => (
+                    <SelectItem key={key} value={key}>
+                      {config.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Vehicle Type</label>
+              <Select
+                value={filters.vehicleType}
+                onValueChange={(value) =>
+                  setFilters((f) => ({ ...f, vehicleType: value, page: 1 }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="All Vehicles" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Vehicles</SelectItem>
+                  {Object.entries(vehicleTypeConfig).map(([key, config]) => (
+                    <SelectItem key={key} value={key}>
+                      {config.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Fare Range</label>
+              <Select
+                value={filters.fareRange}
+                onValueChange={(value) =>
+                  setFilters((f) => ({ ...f, fareRange: value, page: 1 }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="All Fares" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Fares</SelectItem>
+                  <SelectItem value="low">Low (&lt;৳199)</SelectItem>
+                  <SelectItem value="medium">Medium (৳200-৳499)</SelectItem>
+                  <SelectItem value="high">High (&gt;৳500)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Date Range</label>
+              <Select
+                value={filters.dateRange}
+                onValueChange={(value) =>
+                  setFilters((f) => ({ ...f, dateRange: value, page: 1 }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="All Time" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Time</SelectItem>
+                  <SelectItem value="today">Today</SelectItem>
+                  <SelectItem value="week">This Week</SelectItem>
+                  <SelectItem value="month">This Month</SelectItem>
+                  <SelectItem value="year">This Year</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Per Page</label>
+              <Select
+                value={String(filters.limit)}
+                onValueChange={(value) =>
+                  setFilters((f) => ({ ...f, limit: Number(value), page: 1 }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="10" />
+                </SelectTrigger>
+                <SelectContent>
+                  {[5, 10, 20, 50].map((n) => (
+                    <SelectItem key={n} value={String(n)}>
+                      {n}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
       </Card>
-    
+  
+   {/* Summary */}
+      <div className="flex items-center justify-between mt-6 mb-3">
+        <p className="text-sm text-muted-foreground">
+          Showing {startIndex + 1}-{Math.min(endIndex, sortedRides.length)} of{" "}
+          {sortedRides.length} rides
+        </p>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Calendar className="h-4 w-4" />
+          Total rides: {ridesArray.length}
+        </div>
+      </div>
+
+
+
+      
+
       {/* Table */}
       <Card>
         <CardContent className="p-0">
@@ -192,10 +486,10 @@ const RiderHistory = () => {
                   <th className="px-4 py-3">Status</th>
                   <th className="px-4 py-3">Vehicle</th>
                   <th
-                    // className="px-4 py-3 cursor-pointer select-none"
-                    // onClick={() => handleSort("createdAt")}
+                  className="px-4 py-3 cursor-pointer select-none"
+                  onClick={() => handleSort("createdAt")}
                   >
-                    {/* <div className="inline-flex items-center gap-1.5">
+                    <div className="inline-flex items-center gap-1.5">
                       Date
                       {filters.sortBy === "createdAt" ? (
                         <span className="text-xs">
@@ -204,14 +498,14 @@ const RiderHistory = () => {
                       ) : (
                         <ArrowUpDown className="h-3.5 w-3.5" />
                       )}
-                    </div> */}
-                    Date
+                    </div>
+                   
                   </th>
                   <th className="px-4 py-3 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {rides.length === 0 ? (
+                {paginatedRides.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="py-10 text-center">
                       <div className="flex flex-col items-center gap-2 text-muted-foreground">
@@ -219,14 +513,14 @@ const RiderHistory = () => {
                         <p>No rides found. Try adjusting filters.</p>
                         <Button
                         //  variant="outline" onClick={clearFilters}
-                         >
+                        >
                           Clear Filters
                         </Button>
                       </div>
                     </td>
                   </tr>
                 ) : (
-                  rides.map((ride: IRide) => (
+                  paginatedRides?.map((ride: IRide) => (
                     <tr
                       key={ride._id}
                       className="border-b hover:bg-muted/40 transition-colors"
@@ -268,14 +562,14 @@ const RiderHistory = () => {
                         </div>
                       </td>
 
-                      {/* Fare & Distance */}
+                      {/* Fare */}
                       <td className="px-4 py-3">
                         <div className="flex flex-col gap-1">
                           <div className="flex items-center gap-1">
                             <span className="font-medium">
                               {ride.fare?.toFixed(1)}
                             </span>
-                             <FaBangladeshiTakaSign className="h-3 w-3 text-green-600" />
+                            <FaBangladeshiTakaSign className="h-3 w-3 text-green-600" />
                           </div>
                           <div className="text-xs text-muted-foreground">
                             {ride.paymentMethod?.toUpperCase()}
@@ -286,13 +580,13 @@ const RiderHistory = () => {
                       {/* Status */}
                       <td className="px-4 py-3">
                         <Badge
-                           variant="outline"
+                          variant="outline"
                           className={
                             statusConfig[
                               ride.status as keyof typeof statusConfig
                             ]?.color
                           }
-                         >
+                        >
                           {
                             statusConfig[
                               ride.status as keyof typeof statusConfig
@@ -332,19 +626,19 @@ const RiderHistory = () => {
                       </td>
 
                       {/* Actions */}
-                      
+
                       <td className="px-4 py-3 text-right">
                         <Button
                           variant="outline"
                           size="sm"
-                           onClick={() => handleViewDetails(ride)}
+                          onClick={() => handleViewDetails(ride)}
                           className="flex items-center gap-2"
                         >
                           <Eye className="h-4 w-4" />
                           Details
                         </Button>
                       </td>
-                      
+
                     </tr>
                   ))
                 )}
@@ -355,23 +649,34 @@ const RiderHistory = () => {
       </Card>
 
       {/* Pagination */}
-      {meta?.total > 5 && (
-        <div className="mt-4 flex gap-2 flex-wrap">
-          {Array.from({ length: Math.ceil(meta.total / meta.limit) }, (_, idx) => (
-            <button
-              key={idx}
-              onClick={() => setPage(idx + 1)}
-              className={`px-3 py-1 border rounded ${
-                page === idx + 1 ? "bg-blue-500 text-white" : "bg-gray-100"
-              }`}
+     
+      {totalPages > 1 && (
+        <div className="mt-4 flex items-center justify-between">
+          <div className="text-sm text-muted-foreground">
+            Page {filters.page} of {totalPages}
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePageChange(filters.page - 1)}
+              disabled={filters.page <= 1}
             >
-              {idx + 1}
-            </button>
-          ))}
+              <ChevronLeft className="h-4 w-4" /> Prev
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePageChange(filters.page + 1)}
+              disabled={filters.page >= totalPages}
+            >
+              Next <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       )}
 
-         {/* Ride Details Modal */}
+      {/* Ride Details Modal */}
       {showDetailsModal && selectedRide && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-background rounded-lg shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -394,7 +699,7 @@ const RiderHistory = () => {
                     <label className="text-sm font-medium text-muted-foreground">
                       Ride ID
                     </label>
-                 
+
 
                     <p className="font-mono text-sm">
                       #{selectedRide._id ? selectedRide._id.slice(-6) : "N/A"}
@@ -486,7 +791,7 @@ const RiderHistory = () => {
                       {selectedRide.paymentMethod?.toUpperCase()}
                     </div>
                     <div className="text-xs text-muted-foreground">
-                    PaymentMethod
+                      PaymentMethod
                     </div>
                   </div>
                   <div className="text-center p-3 bg-muted/50 rounded-lg">
@@ -509,70 +814,70 @@ const RiderHistory = () => {
                 </div>
 
                 {/* Timeline */}
-                  <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Ride Timeline</h3>
                 <div className="space-y-4">
-                  {selectedRide.rideTimestamps?.requestedAt && (
-                    <div className="flex items-center gap-4">
-                      <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                      <div className="flex-1">
-                        <div className="font-medium">Ride Requested</div>
-                        <div className="text-sm text-muted-foreground">
-                          {formatDate(selectedRide.rideTimestamps?.requestedAt)}
+                  <h3 className="text-lg font-semibold">Ride Timeline</h3>
+                  <div className="space-y-4">
+                    {selectedRide.rideTimestamps?.requestedAt && (
+                      <div className="flex items-center gap-4">
+                        <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                        <div className="flex-1">
+                          <div className="font-medium">Ride Requested</div>
+                          <div className="text-sm text-muted-foreground">
+                            {formatDate(selectedRide.rideTimestamps?.requestedAt)}
+                          </div>
+                        </div>
+                        <div className="text-sm font-mono text-muted-foreground">
+                          {formatTime(selectedRide.rideTimestamps?.requestedAt)}
                         </div>
                       </div>
-                      <div className="text-sm font-mono text-muted-foreground">
-                        {formatTime(selectedRide.rideTimestamps?.requestedAt)}
-                      </div>
-                    </div>
-                  )}
+                    )}
 
-                  {selectedRide.rideTimestamps?.acceptedAt && (
-                    <div className="flex items-center gap-4">
-                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                      <div className="flex-1">
-                        <div className="font-medium">Driver Accepted</div>
-                        <div className="text-sm text-muted-foreground">
-                          {formatDate(selectedRide.rideTimestamps?.acceptedAt)}
+                    {selectedRide.rideTimestamps?.acceptedAt && (
+                      <div className="flex items-center gap-4">
+                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                        <div className="flex-1">
+                          <div className="font-medium">Driver Accepted</div>
+                          <div className="text-sm text-muted-foreground">
+                            {formatDate(selectedRide.rideTimestamps?.acceptedAt)}
+                          </div>
+                        </div>
+                        <div className="text-sm font-mono text-muted-foreground">
+                          {formatTime(selectedRide.rideTimestamps?.acceptedAt)}
                         </div>
                       </div>
-                      <div className="text-sm font-mono text-muted-foreground">
-                        {formatTime(selectedRide.rideTimestamps?.acceptedAt)}
-                      </div>
-                    </div>
-                  )}
+                    )}
 
-                  {selectedRide.rideTimestamps?.pickedUpAt && (
-                    <div className="flex items-center gap-4">
-                      <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                      <div className="flex-1">
-                        <div className="font-medium">Passenger Picked Up</div>
-                        <div className="text-sm text-muted-foreground">
-                          {formatDate(selectedRide.rideTimestamps?.pickedUpAt)}
+                    {selectedRide.rideTimestamps?.pickedUpAt && (
+                      <div className="flex items-center gap-4">
+                        <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                        <div className="flex-1">
+                          <div className="font-medium">Passenger Picked Up</div>
+                          <div className="text-sm text-muted-foreground">
+                            {formatDate(selectedRide.rideTimestamps?.pickedUpAt)}
+                          </div>
+                        </div>
+                        <div className="text-sm font-mono text-muted-foreground">
+                          {formatTime(selectedRide.rideTimestamps?.pickedUpAt)}
                         </div>
                       </div>
-                      <div className="text-sm font-mono text-muted-foreground">
-                        {formatTime(selectedRide.rideTimestamps?.pickedUpAt)}
-                      </div>
-                    </div>
-                  )}
+                    )}
 
-                  {selectedRide.rideTimestamps?.completedAt && (
-                    <div className="flex items-center gap-4">
-                      <div className="w-3 h-3 bg-green-600 rounded-full"></div>
-                      <div className="flex-1">
-                        <div className="font-medium">Ride Completed</div>
-                        <div className="text-sm text-muted-foreground">
-                          {formatDate(selectedRide.rideTimestamps?.completedAt)}
+                    {selectedRide.rideTimestamps?.completedAt && (
+                      <div className="flex items-center gap-4">
+                        <div className="w-3 h-3 bg-green-600 rounded-full"></div>
+                        <div className="flex-1">
+                          <div className="font-medium">Ride Completed</div>
+                          <div className="text-sm text-muted-foreground">
+                            {formatDate(selectedRide.rideTimestamps?.completedAt)}
+                          </div>
+                        </div>
+                        <div className="text-sm font-mono text-muted-foreground">
+                          {formatTime(selectedRide.rideTimestamps?.completedAt)}
                         </div>
                       </div>
-                      <div className="text-sm font-mono text-muted-foreground">
-                        {formatTime(selectedRide.rideTimestamps?.completedAt)}
-                      </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
-              </div>
 
                 {/* Driver Info */}
                 <div className="space-y-2">
@@ -580,8 +885,8 @@ const RiderHistory = () => {
                     Driver ID
                   </label>
                   <p className="font-mono text-sm bg-muted/50 p-2 rounded">
-                     {selectedRide.driver},
-                    
+                    {selectedRide.driver},
+
                   </p>
                 </div>
               </div>
@@ -601,8 +906,9 @@ const RiderHistory = () => {
 
 
     </div>
-    );
+  );
 };
 
 export default RiderHistory;
+
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -13,35 +14,42 @@ const LoginForm = ({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => {
-      const [login] = useLoginMutation();
-      const navigate = useNavigate();
-      const form = useForm();
-     const onSubmit: SubmitHandler<FieldValues> = async (data) => {
+  const [login] = useLoginMutation();
+  const navigate = useNavigate();
+  const form = useForm();
+  const onSubmit: SubmitHandler<FieldValues> = async (data) => {
     try {
       const res = await login(data).unwrap();
-      //  console.log(res)
-      if(res.success){
-         toast.success("Logged in successfully");
+
+      if (res.success) {
+        toast.success("Logged in successfully");
         navigate("/");
       }
-      
-    } catch (err: unknown) {
-      console.error(err);
 
-      // if(err.data.message  === "password does not match"){
-      //   toast.error("Invalid credentials")
-      // }
+    } catch (error: any) {
+      // console.error(error);
+      const message = error?.data?.message;
 
-      // if (err.data.message === "user is Verified") {
-      //   toast.error("Your account is not verified");
-      //   navigate("/verify", { state: data.email });
-      // }
+      if (message === "Email does not Exist") {
+        toast.error("Email does not Exist");
+        return;
+      }
+
+      if (message === "Incorrect password") {
+        toast.error("Incorrect password");
+        return;
+      }
+
+      if (message === "user is Verified") {
+        toast.error("Your account is not verified");
+        // navigate("/verify", { state: data.email });
+      }
     }
   };
 
 
-    return (
-          <div className={cn("flex flex-col gap-6", className)} {...props}>
+  return (
+    <div className={cn("flex flex-col gap-6", className)} {...props}>
       <div className="flex flex-col items-center gap-2 text-center">
         <h1 className="text-2xl font-bold">Login to your account</h1>
         <p className="text-balance text-sm text-muted-foreground">
@@ -115,7 +123,7 @@ const LoginForm = ({
         </Link>
       </div>
     </div>
-    );
+  );
 };
 
 export default LoginForm;

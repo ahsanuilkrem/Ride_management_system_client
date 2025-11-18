@@ -15,21 +15,11 @@ import type { ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import z from "zod";
 
-// type UserType = {
-//     _id: string;
-//     role: string;
-//     isActive: string;
-//     isBlocked: string;
-// };
 
-// type UpdateModalProps = {
-//     user: UserType;
-// };
 
 const formSchema = z.object({
     isBlocked: z.string()
 });
-
 
 
 interface IProps {
@@ -38,7 +28,7 @@ interface IProps {
    
 }
 
-//  { user }: UpdateModalProps
+
 
 export function UpdateModal({ children, onConfirm, }: IProps) {
 
@@ -56,18 +46,7 @@ export function UpdateModal({ children, onConfirm, }: IProps) {
         onConfirm()
         console.log(data)
 
-        // const payload = {
-        //     _id: user._id,
-        //     isBlocked: data,
-
-        // };
-
-        // try {
-        //     const res = await users(data).unwrap();
-        //     console.log(res)
-        // } catch (error) {
-        //     console.log(error)
-        // }
+      
     };
 
 

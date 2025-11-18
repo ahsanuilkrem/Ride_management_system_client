@@ -225,7 +225,7 @@ export default function GetRide() {
       toast.success(
         "Ride accepted successfully! Redirecting to Active Rides..."
       );
-      setTimeout(() => navigate("driverDashboard/activeRider"), 800);
+      setTimeout(() => navigate("/driverDashboard/activeRider"), 800);
     } catch (error: any) {
       const message =
         error?.data?.message ||

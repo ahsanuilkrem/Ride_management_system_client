@@ -24,11 +24,6 @@ import {
 import { toast } from "sonner";
 import { Edit3, Save, X, Car } from "lucide-react";
 import type { Availability, IUpdateMyDriverProfile, VehicleType } from "@/types/driver.type";
-// import type {
-//   IUpdateMyDriverProfile,
-//   Availability,
-//   VehicleType,
-// } from "@/types";
 
 export default function DrivingProfile() {
   const { data: driverProfile, refetch } = useGetDriverMyProfileQuery();

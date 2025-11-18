@@ -21,7 +21,7 @@ export const riderApi = baseApi.injectEndpoints({
         }),
         getmyHistory: builder.query({
             query: (body) => ({
-                url: "/rides/myHistory",
+                url: "rides/myHistory",
                 method: "GET",
                 data: body,
             }),
@@ -30,10 +30,7 @@ export const riderApi = baseApi.injectEndpoints({
                 meta: response.meta,
             }),
         }),
-        updateRideStatus: builder.mutation<
-            IResponse<IRide>,
-            { rideId: string; rideStatus: RideStatus }
-        >({
+        updateRideStatus: builder.mutation<IResponse<IRide>, { rideId: string; rideStatus: RideStatus }>({
             query: ({ rideId, rideStatus }) => ({
                 url: `/rides/rideStatus/${rideId}`,
                 method: "PATCH",
@@ -42,17 +39,43 @@ export const riderApi = baseApi.injectEndpoints({
             invalidatesTags: ["RIDER"],
         }),
 
+        cancelRide: builder.mutation<IResponse<IRide>, { rideId: string }>({
+            query: ({ rideId }) => ({
+                url: `/rides/cancel/${rideId}`,
+                method: "PATCH",
+                data: { rideStatus: "cancelled_by_rider" as RideStatus },
+            }),
+            invalidatesTags: ["RIDER"],
+        }),
+
+        getActiveRider: builder.query<IRide | null, void>({
+            query: () => ({
+                url: "/rides/myHistory",
+                method: "GET",
+            }),
+            providesTags: ["RIDER"],
+            transformResponse: (response: IResponse<IRide[]>) => {
+                const active = (response.data || []).find((r) =>
+                    ["requested", "accepted", "picked_up", "in_transit"].includes(
+                        r.status
+                    )
+                );
+                return active ?? null;
+            },
+        }),
+
 
     }),
-
 })
 
 
 
 
-export const { 
-    useRequestRiderMutation, 
-    useGetallrideQuery, 
+export const {
+    useRequestRiderMutation,
+    useGetallrideQuery,
     useGetmyHistoryQuery,
     useUpdateRideStatusMutation,
-  } = riderApi;
+    useCancelRideMutation,
+    useGetActiveRiderQuery
+} = riderApi;
